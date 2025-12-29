@@ -12,16 +12,17 @@ RUN dpkg --add-architecture i386 \
     && apt-get update && apt-get install -y \
     lib32gcc-s1 \
     lib32stdc++6 \
-    libcurl4-gnutls-dev:i386 \
-    libcurl3-gnutls:i386 \
     libc6:i386 \
     libstdc++6:i386 \
+    libcurl4-gnutls-dev \
+    libcurl3-gnutls \
+    libgcc1 \
+    libstdc++6 \
     wget \
     curl \
     ca-certificates \
     procps \
     gettext-base \
-    && ln -s /usr/lib/i386-linux-gnu/libcurl-gnutls.so.4 /usr/lib/libcurl-gnutls.so.4 2>/dev/null || true \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -37,7 +38,8 @@ WORKDIR $HOME
 # Download and install SteamCMD
 RUN cd $STEAMCMD_DIR \
     && wget https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz \
-    && tar -xvzf steamcmd_linux.tar.gz && rm -f steamcmd_linux.tar.gz
+    && tar -xvzf steamcmd_linux.tar.gz && rm -f $STEAMCMD_DIR/steamcmd_linux.tar.gz \
+    && mkdir -p $HOME/Steam/appcache
 
 # Note: SteamCMD will initialize on first run in the startup script
 
