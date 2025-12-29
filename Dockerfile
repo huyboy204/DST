@@ -13,6 +13,7 @@ RUN dpkg --add-architecture i386 \
     lib32gcc-s1 \
     lib32stdc++6 \
     libcurl4-gnutls-dev:i386 \
+    libcurl3-gnutls:i386 \
     libc6:i386 \
     libstdc++6:i386 \
     wget \
@@ -20,6 +21,7 @@ RUN dpkg --add-architecture i386 \
     ca-certificates \
     procps \
     gettext-base \
+    && ln -s /usr/lib/i386-linux-gnu/libcurl-gnutls.so.4 /usr/lib/libcurl-gnutls.so.4 2>/dev/null || true \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
