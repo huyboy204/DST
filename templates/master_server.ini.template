@@ -1,0 +1,14 @@
+[NETWORK]
+server_port = 10999
+
+[SHARD]
+is_master = true
+name = Master
+id = 1
+
+[STEAM]
+authentication_port = 12345
+master_server_port = 12346
+
+[ACCOUNT]
+encode_user_path = true

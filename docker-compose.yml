@@ -1,0 +1,61 @@
+services:
+  dst-server:
+    platform: linux/amd64
+    build: .
+    image: dst:latest
+    container_name: dst-dedicated-server
+    restart: unless-stopped
+    
+    ports:
+      # Game ports - MUST be port forwarded for internet access
+      - "10999:10999/udp"  # Master shard
+      - "11000:11000/udp"  # Caves shard
+      # Steam authentication ports - internal use
+      - "12345:12345/udp"  # Master Steam auth
+      - "12346:12346/udp"  # Master Steam master server
+      - "12347:12347/udp"  # Caves Steam auth
+      - "12348:12348/udp"  # Caves Steam master server
+      # Shard communication - internal use
+      - "10888:10888/udp"  # Master-Caves communication
+    
+    environment:
+      # REQUIRED: Get your cluster token from https://accounts.klei.com/account/game/servers?game=DontStarveTogether
+      - CLUSTER_TOKEN=pds-g^KU_PLcbAJxJ^Wlux7hkknG7u4gB4roLQnS/tkj6h2dSNX3byZa4giC8=
+      
+      # Server configuration
+      - CLUSTER_NAME=MyGame
+      - CLUSTER_DESCRIPTION=A DST Server
+      - CLUSTER_PASSWORD=huydeptrai
+      - CLUSTER_INTENTION=cooperative
+      - MAX_PLAYERS=6
+      - GAME_MODE=endless
+      - PVP=false
+      - PAUSE_WHEN_EMPTY=true
+      
+      # World generation
+      - MASTER_PRESET=SURVIVAL_TOGETHER
+      - CAVES_PRESET=DST_CAVE
+      
+      # Server management
+      - AUTO_UPDATE=true
+      - ENABLE_SNAPSHOTS=true
+      - TICK_RATE=15
+      - SHUTDOWN_TIMEOUT=30
+    
+    volumes:
+      # Persistent server data
+      - ./test/data:/opt/steam/.klei/DoNotStarveTogether/MyDediServer
+      # Server configuration (optional - mount your own configs)
+      - ./test/config:/opt/steam/config:ro
+      # Mods configuration (optional)
+      - ./test/mods:/opt/steam/mods:ro
+    
+    healthcheck:
+      test: ["CMD-SHELL", "/bin/bash /opt/steam/healthcheck.sh"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+    
+    stdin_open: true
+    tty: true

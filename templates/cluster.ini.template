@@ -1,0 +1,29 @@
+[GAMEPLAY]
+game_mode = ${GAME_MODE}
+max_players = ${MAX_PLAYERS}
+pvp = ${PVP}
+pause_when_empty = ${PAUSE_WHEN_EMPTY}
+vote_kick_enabled = true
+
+[NETWORK]
+cluster_description = ${CLUSTER_DESCRIPTION}
+cluster_name = ${CLUSTER_NAME}
+cluster_intention = ${CLUSTER_INTENTION}
+cluster_password = ${CLUSTER_PASSWORD}
+
+[MISC]
+console_enabled = true
+max_snapshots = 6
+enable_vote_kick = true
+
+[SHARD]
+shard_enabled = true
+bind_ip = 127.0.0.1
+master_ip = 127.0.0.1
+master_port = 10888
+cluster_key = dst
+
+[STEAM]
+steam_group_only = false
+steam_group_id = 0
+steam_group_admins = false
