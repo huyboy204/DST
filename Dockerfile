@@ -33,7 +33,8 @@ RUN chmod +x /entrypoint.sh
 RUN useradd -m -d $HOME -s /bin/bash $USER
 
 # Create necessary directories as steam user
-RUN mkdir -p $HOME/steamcmd $HOME/dst
+RUN mkdir -p $STEAMCMD_DIR $DST_DIR \
+    && chown -R $USER:$USER $HOME
 
 # Download and install SteamCMD as steam user
 USER $USER
