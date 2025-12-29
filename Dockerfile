@@ -25,20 +25,11 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy and set up entrypoint
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
 # Create steam user and home directories
 RUN useradd -m -d $HOME -s /bin/bash $USER
 
 # Create necessary directories as steam user
-RUN mkdir -p $STEAMCMD_DIR $DST_DIR \
-    && chown -R $USER:$USER $HOME
-
-# Download and install SteamCMD as steam user
-USER $USER
-WORKDIR $HOME
+RUN mkdir -p $STEAMCMD_DIR $DST_DIR
 
 RUN cd $STEAMCMD_DIR \
     && wget https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz \
@@ -52,11 +43,15 @@ EXPOSE 12345/udp 12346/udp 12347/udp 12348/udp
 # Shard communication port (internal)
 EXPOSE 10888/udp
 
+USER $USER
+WORKDIR $HOME
+
 # Copy startup script
-COPY --chown=steam:steam start_server.sh $HOME/start_server.sh
-COPY --chown=steam:steam healthcheck.sh $HOME/healthcheck.sh
-COPY --chown=steam:steam templates/ $HOME/templates/
+COPY start_server.sh $HOME/start_server.sh
+COPY healthcheck.sh $HOME/healthcheck.sh
+COPY templates/ $HOME/templates/
+RUN chown -R $USER:$USER $HOME
 RUN chmod +x $HOME/start_server.sh $HOME/healthcheck.sh
 
 # Set the entrypoint
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/home/steam/start_server.sh"]
