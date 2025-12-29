@@ -1,19 +1,15 @@
 services:
   dst-server:
-    image: ghcr.io/huyboy204/dst:latest
+    build: .
     container_name: dst-dedicated-server
     restart: unless-stopped
     
     ports:
-      # Game ports - MUST be port forwarded for internet access
-      - "10999:10999/udp"  # Master shard
-      - "11000:11000/udp"  # Caves shard
+      - "10999:10999/udp"
+      - "11000:11000/udp"
     
     environment:
-      # REQUIRED: Get your cluster token from https://accounts.klei.com/account/game/servers?game=DontStarveTogether
       - CLUSTER_TOKEN=${CLUSTER_TOKEN}
-      
-      # Server configuration
       - CLUSTER_NAME=${CLUSTER_NAME:-My DST Server}
       - CLUSTER_DESCRIPTION=${CLUSTER_DESCRIPTION:-A Don't Starve Together Server}
       - CLUSTER_PASSWORD=${CLUSTER_PASSWORD:-}
@@ -22,20 +18,14 @@ services:
       - GAME_MODE=${GAME_MODE:-survival}
       - PVP=${PVP:-false}
       - PAUSE_WHEN_EMPTY=${PAUSE_WHEN_EMPTY:-true}
-      
-      # World generation
       - MASTER_PRESET=${MASTER_PRESET:-SURVIVAL_TOGETHER}
       - CAVES_PRESET=${CAVES_PRESET:-DST_CAVE}
-      
-      # Server management
       - AUTO_UPDATE=${AUTO_UPDATE:-true}
       - TICK_RATE=${TICK_RATE:-15}
       - SHUTDOWN_TIMEOUT=${SHUTDOWN_TIMEOUT:-30}
     
     volumes:
-      # Persistent server data - mount to host for easy access
-      - ./data:/opt/steam/.klei/DoNotStarveTogether/MyDediServer
-      - bin:/opt/steam/dst/bin64/dontstarve_dedicated_server_nullrenderer_x64
+      - ./data:/home/steam/.klei/DoNotStarveTogether/MyDediServer
     
     healthcheck:
       test: ["CMD-SHELL", "/bin/bash /home/steam/healthcheck.sh"]
@@ -46,6 +36,3 @@ services:
     
     stdin_open: true
     tty: true
-
-volumes:
-  bin:

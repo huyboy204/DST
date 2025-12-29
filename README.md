@@ -30,57 +30,43 @@ A comprehensive Docker container solution for hosting a Don't Starve Together (D
 3. Click "Add New Server" or use an existing token
 4. Copy the cluster token (it's a long string like `pds-g^KU_aBcDeFg...`)
 
-### 2. Clone or Download This Repository
+### 2. Configure Environment Variables
 
 ```bash
-cd /path/to/your/directory
-git clone <your-repo-url>
-cd DST
+cp .env.example .env
+# Edit .env and set your CLUSTER_TOKEN
 ```
 
-### 3. Configure Environment Variables
-
-Create a `.env` file in the project root:
+### 3. Create Required Directories
 
 ```bash
-# REQUIRED
-CLUSTER_TOKEN=your_cluster_token_here
-
-# OPTIONAL - Server Settings
-CLUSTER_NAME=My DST Server
-CLUSTER_DESCRIPTION=A Don't Starve Together Server
-CLUSTER_PASSWORD=
-CLUSTER_INTENTION=cooperative
-MAX_PLAYERS=6
-GAME_MODE=survival
-PVP=false
-PAUSE_WHEN_EMPTY=true
-
-# Server Management
-AUTO_UPDATE=true
-TICK_RATE=15
+mkdir -p data
+chmod 777 data
 ```
 
-### 4. Build and Start the Server
+### 4. Start the Server
 
+Using Docker Compose (recommended):
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
-The first startup will take several minutes as it:
-- Downloads the Docker base image
-- Installs SteamCMD
-- Downloads DST server files (~2GB)
-- Starts both Master and Caves shards
+Or using Docker directly:
+```bash
+docker pull ghcr.io/huyboy204/dst:latest
+docker run -d \
+  --name dst-dedicated-server \
+  -p 10999:10999/udp \
+  -p 11000:11000/udp \
+  -e CLUSTER_TOKEN="your_token_here" \
+  -v $(pwd)/data:/home/steam/.klei/DoNotStarveTogether/MyDediServer \
+  ghcr.io/huyboy204/dst:latest
+```
 
 ### 5. View Logs
 
 ```bash
-# Follow logs in real-time
 docker logs -f dst-dedicated-server
-
-# View last 100 lines
-docker logs --tail 100 dst-dedicated-server
 ```
 
 ### 6. Configure Port Forwarding

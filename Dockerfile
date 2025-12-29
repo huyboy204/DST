@@ -14,10 +14,10 @@ RUN dpkg --add-architecture i386 \
     lib32stdc++6 \
     libc6:i386 \
     libstdc++6:i386 \
-    libcurl4-gnutls-dev \
-    libcurl3-gnutls \
-    libgcc1 \
-    libstdc++6 \
+    libcurl4-gnutls-dev:i386 \
+    libcurl3-gnutls:amd64 \
+    libgcc1:amd64 \
+    libstdc++6:amd64 \
     wget \
     curl \
     ca-certificates \
