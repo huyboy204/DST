@@ -160,6 +160,13 @@ if [ "$AUTO_UPDATE" = "true" ]; then
     while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
         echo -e "${YELLOW}Attempt $((RETRY_COUNT + 1)) of ${MAX_RETRIES}...${NC}"
         
+        # Clean up any partial downloads on retry
+        if [ $RETRY_COUNT -gt 0 ]; then
+            echo -e "${YELLOW}Cleaning up previous attempt...${NC}"
+            rm -rf ${DST_DIR}/steamapps/downloading/* 2>/dev/null || true
+            rm -rf ${HOME}/Steam/appcache/* 2>/dev/null || true
+        fi
+        
         ${STEAMCMD_DIR}/steamcmd.sh \
             +@sSteamCmdForcePlatformType linux \
             +force_install_dir ${DST_DIR} \
@@ -167,21 +174,29 @@ if [ "$AUTO_UPDATE" = "true" ]; then
             +app_update ${DST_APP_ID} validate \
             +quit
         
-        if [ $? -eq 0 ] && [ -f "${DST_DIR}/bin64/dontstarve_dedicated_server_nullrenderer_x64" ]; then
+        EXIT_CODE=$?
+        
+        if [ $EXIT_CODE -eq 0 ] && [ -f "${DST_DIR}/bin64/dontstarve_dedicated_server_nullrenderer_x64" ]; then
             echo -e "${GREEN}Server updated successfully!${NC}"
             SUCCESS=true
             break
         else
-            echo -e "${YELLOW}Attempt $((RETRY_COUNT + 1)) failed. Retrying...${NC}"
+            echo -e "${YELLOW}Attempt $((RETRY_COUNT + 1)) failed (exit code: ${EXIT_CODE})${NC}"
             RETRY_COUNT=$((RETRY_COUNT + 1))
-            sleep 5
+            if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+                echo -e "${YELLOW}Waiting 10 seconds before retry...${NC}"
+                sleep 10
+            fi
         fi
     done
     
     if [ "$SUCCESS" = false ]; then
         echo -e "${RED}Server update failed after ${MAX_RETRIES} attempts!${NC}"
-        echo -e "${YELLOW}This may be due to Apple Silicon compatibility issues.${NC}"
-        echo -e "${YELLOW}The Docker container is designed for x86_64/amd64 platforms.${NC}"
+        echo -e "${YELLOW}Possible causes:${NC}"
+        echo -e "${YELLOW}  - Steam servers are temporarily unavailable${NC}"
+        echo -e "${YELLOW}  - Insufficient disk space${NC}"
+        echo -e "${YELLOW}  - Network connectivity issues${NC}"
+        echo -e "${YELLOW}Try: docker compose restart${NC}"
         exit 1
     fi
 else
@@ -197,6 +212,13 @@ else
         while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
             echo -e "${YELLOW}Attempt $((RETRY_COUNT + 1)) of ${MAX_RETRIES}...${NC}"
             
+            # Clean up any partial downloads on retry
+            if [ $RETRY_COUNT -gt 0 ]; then
+                echo -e "${YELLOW}Cleaning up previous attempt...${NC}"
+                rm -rf ${DST_DIR}/steamapps/downloading/* 2>/dev/null || true
+                rm -rf ${HOME}/Steam/appcache/* 2>/dev/null || true
+            fi
+            
             ${STEAMCMD_DIR}/steamcmd.sh \
                 +@sSteamCmdForcePlatformType linux \
                 +force_install_dir ${DST_DIR} \
@@ -204,14 +226,19 @@ else
                 +app_update ${DST_APP_ID} validate \
                 +quit
             
-            if [ $? -eq 0 ] && [ -f "${DST_DIR}/bin64/dontstarve_dedicated_server_nullrenderer_x64" ]; then
+            EXIT_CODE=$?
+            
+            if [ $EXIT_CODE -eq 0 ] && [ -f "${DST_DIR}/bin64/dontstarve_dedicated_server_nullrenderer_x64" ]; then
                 echo -e "${GREEN}Server installed successfully!${NC}"
                 SUCCESS=true
                 break
             else
-                echo -e "${YELLOW}Attempt $((RETRY_COUNT + 1)) failed. Retrying...${NC}"
+                echo -e "${YELLOW}Attempt $((RETRY_COUNT + 1)) failed (exit code: ${EXIT_CODE})${NC}"
                 RETRY_COUNT=$((RETRY_COUNT + 1))
-                sleep 5
+                if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+                    echo -e "${YELLOW}Waiting 10 seconds before retry...${NC}"
+                    sleep 10
+                fi
             fi
         done
         
