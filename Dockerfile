@@ -35,7 +35,7 @@ WORKDIR $HOME
 # Download and install SteamCMD
 RUN cd $STEAMCMD_DIR \
     && wget https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz \
-    && tar -xvzf steamcmd_linux.tar.gz && rm -f $STEAMCMD_DIR/steamcmd_linux.tar.gz
+    && tar -xvzf steamcmd_linux.tar.gz && rm -f steamcmd_linux.tar.gz
 
 # Note: SteamCMD will initialize on first run in the startup script
 

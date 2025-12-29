@@ -42,11 +42,11 @@ services:
     
     volumes:
       # Persistent server data
-      - ./test/data:/opt/steam/.klei/DoNotStarveTogether/MyDediServer
+      - data:/opt/steam/.klei/DoNotStarveTogether/MyDediServer
       # Server configuration (optional - mount your own configs)
-      - ./test/config:/opt/steam/config:ro
+      - ./config:/opt/steam/config:ro
       # Mods configuration (optional)
-      - ./test/mods:/opt/steam/mods:ro
+      - ./mods:/opt/steam/mods:ro
     
     healthcheck:
       test: ["CMD-SHELL", "/bin/bash /opt/steam/healthcheck.sh"]
@@ -57,3 +57,6 @@ services:
     
     stdin_open: true
     tty: true
+
+volumes:
+  data:

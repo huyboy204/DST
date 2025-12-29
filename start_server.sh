@@ -85,7 +85,25 @@ if [ -z "$CLUSTER_TOKEN" ]; then
 fi
 
 echo -e "${GREEN}Step 1: Setting up cluster token...${NC}"
-echo "$CLUSTER_TOKEN" > "${CLUSTER_DIR}/cluster_token.txt"
+
+# Ensure cluster directory exists and has proper permissions
+if [ ! -d "${CLUSTER_DIR}" ]; then
+    mkdir -p "${CLUSTER_DIR}"
+fi
+
+# Try to fix permissions if we can't write
+if [ ! -w "${CLUSTER_DIR}" ]; then
+    echo -e "${YELLOW}Warning: Cannot write to ${CLUSTER_DIR}. Trying to fix permissions...${NC}"
+    # This will only work if run as root, otherwise it will fail silently
+    chmod -R u+w "${CLUSTER_DIR}" 2>/dev/null || true
+fi
+
+echo "$CLUSTER_TOKEN" > "${CLUSTER_DIR}/cluster_token.txt" || {
+    echo -e "${RED}ERROR: Cannot write cluster token to ${CLUSTER_DIR}/cluster_token.txt${NC}"
+    echo -e "${YELLOW}Please ensure the mounted volume has write permissions for user ID $(id -u)${NC}"
+    echo -e "${YELLOW}Run on host: chmod -R 777 ./test/data${NC}"
+    exit 1
+}
 
 # Copy or generate configuration files
 echo -e "${GREEN}Step 2: Configuring server...${NC}"
