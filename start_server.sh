@@ -92,13 +92,32 @@ fi
 
 echo -e "${GREEN}Step 1: Setting up cluster token...${NC}"
 
+# Ensure cluster directory exists
+if [ ! -d "${CLUSTER_DIR}" ]; then
+    mkdir -p "${CLUSTER_DIR}" || {
+        echo -e "${RED}ERROR: Cannot create ${CLUSTER_DIR}${NC}"
+        echo -e "${YELLOW}Permission issue with mounted volume.${NC}"
+        exit 1
+    }
+fi
+
+# Check if we can write to the cluster directory
+if [ ! -w "${CLUSTER_DIR}" ]; then
+    echo -e "${RED}ERROR: Cannot write to ${CLUSTER_DIR}${NC}"
+    echo -e "${YELLOW}Permission issue detected!${NC}"
+    echo -e "${YELLOW}Container user: $(whoami) (UID: $(id -u), GID: $(id -g))${NC}"
+    echo -e "${YELLOW}Directory owner: $(stat -c '%U:%G (UID: %u, GID: %g)' \"${CLUSTER_DIR}\" 2>/dev/null || stat -f '%Su:%Sg (UID: %u, GID: %g)' \"${CLUSTER_DIR}\")${NC}"
+    echo ""
+    echo -e "${YELLOW}Fix: Run on host:${NC}"
+    echo -e "${YELLOW}  sudo chown -R $(id -u):$(id -g) ./data${NC}"
+    echo -e "${YELLOW}  OR${NC}"
+    echo -e "${YELLOW}  chmod -R 777 ./data${NC}"
+    exit 1
+fi
+
 # Write cluster token
 echo "$CLUSTER_TOKEN" > "${CLUSTER_DIR}/cluster_token.txt" || {
     echo -e "${RED}ERROR: Cannot write cluster token to ${CLUSTER_DIR}/cluster_token.txt${NC}"
-    echo -e "${YELLOW}This should not happen as permissions are fixed by entrypoint.${NC}"
-    echo -e "${YELLOW}Container user: $(whoami) (UID: $(id -u))${NC}"
-    echo -e "${YELLOW}Directory: ${CLUSTER_DIR}${NC}"
-    ls -la "${CLUSTER_DIR}" 2>/dev/null || echo "Directory doesn't exist"
     exit 1
 }
 

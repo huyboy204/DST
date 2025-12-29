@@ -28,8 +28,11 @@ RUN apt-get update && apt-get install -y \
 # Create steam user and home directories
 RUN useradd -m -d $HOME -s /bin/bash $STEAM_USER
 
-# Create necessary directories as steam user
-RUN mkdir -p $STEAMCMD_DIR $DST_DIR
+# Create necessary directories as steam user and set permissions
+RUN mkdir -p $STEAMCMD_DIR $DST_DIR \
+    && mkdir -p $HOME/.klei/DoNotStarveTogether/MyDediServer/Master \
+    && mkdir -p $HOME/.klei/DoNotStarveTogether/MyDediServer/Caves \
+    && chown -R $STEAM_USER:$STEAM_USER $HOME
 
 RUN cd $STEAMCMD_DIR \
     && wget https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz \

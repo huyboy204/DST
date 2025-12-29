@@ -25,8 +25,8 @@ services:
       - SHUTDOWN_TIMEOUT=${SHUTDOWN_TIMEOUT:-30}
     
     volumes:
+      # Persistent server data - saves, mods, and configuration
       - ./data:/home/steam/.klei/DoNotStarveTogether/MyDediServer
-      - bin:/home/steam/dst/bin64
     
     healthcheck:
       test: ["CMD-SHELL", "/bin/bash /home/steam/healthcheck.sh"]
@@ -37,6 +37,3 @@ services:
     
     stdin_open: true
     tty: true
-
-volumes:
-  bin:
