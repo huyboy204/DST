@@ -3,9 +3,9 @@ FROM --platform=linux/amd64 ubuntu:22.04
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive \
     USER=steam \
-    HOME=/opt/steam \
-    STEAMCMD_DIR=/opt/steam/steamcmd \
-    DST_DIR=/opt/steam/dst
+    HOME=/home/steam \
+    STEAMCMD_DIR=/home/steam/steamcmd \
+    DST_DIR=/home/steam/dst
 
 # Enable i386 architecture and install dependencies
 RUN dpkg --add-architecture i386 \
@@ -28,8 +28,7 @@ RUN dpkg --add-architecture i386 \
 
 # Create steam user and directories
 RUN useradd -m -d $HOME -s /bin/bash $USER \
-    && mkdir -p $STEAMCMD_DIR $DST_DIR \
-    && chown -R $USER:$USER $HOME
+    && mkdir -p $STEAMCMD_DIR $DST_DIR
 
 # Switch to steam user
 USER $USER
@@ -62,4 +61,4 @@ COPY --chown=steam:steam templates/ $HOME/templates/
 RUN chmod +x $HOME/start_server.sh $HOME/healthcheck.sh
 
 # Set the entrypoint
-ENTRYPOINT ["/opt/steam/start_server.sh"]
+ENTRYPOINT ["/home/steam/start_server.sh"]
