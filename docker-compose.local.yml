@@ -2,7 +2,7 @@ services:
   dst-server:
     build: .
     container_name: dst-dedicated-server
-    restart: unless-stopped
+    restart: "on-failure:5"
     
     ports:
       - "10999:10999/udp"

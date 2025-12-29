@@ -43,14 +43,15 @@ EXPOSE 12345/udp 12346/udp 12347/udp 12348/udp
 # Shard communication port (internal)
 EXPOSE 10888/udp
 
-USER $USER
-WORKDIR $HOME
-
 # Copy startup script
 COPY start_server.sh $HOME/start_server.sh
 COPY healthcheck.sh $HOME/healthcheck.sh
 COPY templates/ $HOME/templates/
 RUN chown -R $USER:$USER $HOME
+
+USER $USER
+WORKDIR $HOME
+
 RUN chmod +x $HOME/start_server.sh $HOME/healthcheck.sh
 
 # Set the entrypoint

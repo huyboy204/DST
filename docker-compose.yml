@@ -2,7 +2,7 @@ services:
   dst-server:
     image: ghcr.io/huyboy204/dst:latest
     container_name: dst-dedicated-server
-    restart: unless-stopped
+    restart: "on-failure:5"
     
     ports:
       # Game ports - MUST be port forwarded for internet access
