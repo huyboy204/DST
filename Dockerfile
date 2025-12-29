@@ -2,7 +2,7 @@ FROM --platform=linux/amd64 ubuntu:22.04
 
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive \
-    USER=steam \
+    STEAM_USER=steam \
     HOME=/home/steam \
     STEAMCMD_DIR=/home/steam/steamcmd \
     DST_DIR=/home/steam/dst
@@ -26,7 +26,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Create steam user and home directories
-RUN useradd -m -d $HOME -s /bin/bash $USER
+RUN useradd -m -d $HOME -s /bin/bash $STEAM_USER
 
 # Create necessary directories as steam user
 RUN mkdir -p $STEAMCMD_DIR $DST_DIR
@@ -47,9 +47,9 @@ EXPOSE 10888/udp
 COPY start_server.sh $HOME/start_server.sh
 COPY healthcheck.sh $HOME/healthcheck.sh
 COPY templates/ $HOME/templates/
-RUN chown -R $USER:$USER $HOME
+RUN chown -R $STEAM_USER:$STEAM_USER $HOME
 
-USER $USER
+USER $STEAM_USER
 WORKDIR $HOME
 
 RUN chmod +x $HOME/start_server.sh $HOME/healthcheck.sh
