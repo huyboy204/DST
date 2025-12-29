@@ -26,19 +26,19 @@ RUN dpkg --add-architecture i386 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Create steam user and directories
-RUN useradd -m -d $HOME -s /bin/bash $USER \
-    && mkdir -p $STEAMCMD_DIR $DST_DIR
+# Create steam user and home directories
+RUN useradd -m -d $HOME -s /bin/bash $USER
 
 # Switch to steam user
 USER $USER
 WORKDIR $HOME
 
+RUN mkdir -p $STEAMCMD_DIR $DST_DIR
+
 # Download and install SteamCMD
 RUN cd $STEAMCMD_DIR \
     && wget https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz \
-    && tar -xvzf steamcmd_linux.tar.gz && rm -f $STEAMCMD_DIR/steamcmd_linux.tar.gz \
-    && mkdir -p $HOME/Steam/appcache
+    && tar -xvzf steamcmd_linux.tar.gz && rm -f $STEAMCMD_DIR/steamcmd_linux.tar.gz
 
 # Note: SteamCMD will initialize on first run in the startup script
 
