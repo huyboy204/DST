@@ -1,8 +1,6 @@
 services:
   dst-server:
-    platform: linux/amd64
-    build: .
-    image: dst:latest
+    image: ghcr.io/huyboy204/dst:latest
     container_name: dst-dedicated-server
     restart: unless-stopped
     
