@@ -151,27 +151,74 @@ fi
 # Update/Install DST Server
 if [ "$AUTO_UPDATE" = "true" ]; then
     echo -e "${GREEN}Step 3: Updating Don't Starve Together server...${NC}"
-    ${STEAMCMD_DIR}/steamcmd.sh \
-        +force_install_dir ${DST_DIR} \
-        +login anonymous \
-        +app_update ${DST_APP_ID} validate \
-        +quit
     
-    if [ $? -eq 0 ]; then
-        echo -e "${GREEN}Server updated successfully!${NC}"
-    else
-        echo -e "${RED}Server update failed!${NC}"
+    # Retry logic for SteamCMD (sometimes fails on first attempt)
+    MAX_RETRIES=3
+    RETRY_COUNT=0
+    SUCCESS=false
+    
+    while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+        echo -e "${YELLOW}Attempt $((RETRY_COUNT + 1)) of ${MAX_RETRIES}...${NC}"
+        
+        ${STEAMCMD_DIR}/steamcmd.sh \
+            +@sSteamCmdForcePlatformType linux \
+            +force_install_dir ${DST_DIR} \
+            +login anonymous \
+            +app_update ${DST_APP_ID} validate \
+            +quit
+        
+        if [ $? -eq 0 ] && [ -f "${DST_DIR}/bin64/dontstarve_dedicated_server_nullrenderer_x64" ]; then
+            echo -e "${GREEN}Server updated successfully!${NC}"
+            SUCCESS=true
+            break
+        else
+            echo -e "${YELLOW}Attempt $((RETRY_COUNT + 1)) failed. Retrying...${NC}"
+            RETRY_COUNT=$((RETRY_COUNT + 1))
+            sleep 5
+        fi
+    done
+    
+    if [ "$SUCCESS" = false ]; then
+        echo -e "${RED}Server update failed after ${MAX_RETRIES} attempts!${NC}"
+        echo -e "${YELLOW}This may be due to Apple Silicon compatibility issues.${NC}"
+        echo -e "${YELLOW}The Docker container is designed for x86_64/amd64 platforms.${NC}"
         exit 1
     fi
 else
     echo -e "${YELLOW}Step 3: Auto-update disabled. Checking if server is installed...${NC}"
     if [ ! -f "${DST_DIR}/bin64/dontstarve_dedicated_server_nullrenderer_x64" ]; then
         echo -e "${YELLOW}Server not found. Installing...${NC}"
-        ${STEAMCMD_DIR}/steamcmd.sh \
-            +force_install_dir ${DST_DIR} \
-            +login anonymous \
-            +app_update ${DST_APP_ID} validate \
-            +quit
+        
+        # Retry logic for initial install
+        MAX_RETRIES=3
+        RETRY_COUNT=0
+        SUCCESS=false
+        
+        while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            echo -e "${YELLOW}Attempt $((RETRY_COUNT + 1)) of ${MAX_RETRIES}...${NC}"
+            
+            ${STEAMCMD_DIR}/steamcmd.sh \
+                +@sSteamCmdForcePlatformType linux \
+                +force_install_dir ${DST_DIR} \
+                +login anonymous \
+                +app_update ${DST_APP_ID} validate \
+                +quit
+            
+            if [ $? -eq 0 ] && [ -f "${DST_DIR}/bin64/dontstarve_dedicated_server_nullrenderer_x64" ]; then
+                echo -e "${GREEN}Server installed successfully!${NC}"
+                SUCCESS=true
+                break
+            else
+                echo -e "${YELLOW}Attempt $((RETRY_COUNT + 1)) failed. Retrying...${NC}"
+                RETRY_COUNT=$((RETRY_COUNT + 1))
+                sleep 5
+            fi
+        done
+        
+        if [ "$SUCCESS" = false ]; then
+            echo -e "${RED}Server installation failed after ${MAX_RETRIES} attempts!${NC}"
+            exit 1
+        fi
     else
         echo -e "${GREEN}Server already installed.${NC}"
     fi
