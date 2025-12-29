@@ -34,8 +34,8 @@ services:
     
     volumes:
       # Persistent server data - mount to host for easy access
-      - ./data:/opt/steam/.klei/DoNotStarveTogether/MyDediServer
-      - bin:/opt/steam/dst/bin64/dontstarve_dedicated_server_nullrenderer_x64
+      - ./data:/home/steam/.klei/DoNotStarveTogether/MyDediServer
+      - bin:/home/steam/dst/bin64
     
     healthcheck:
       test: ["CMD-SHELL", "/bin/bash /home/steam/healthcheck.sh"]

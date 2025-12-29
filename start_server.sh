@@ -32,6 +32,12 @@ SHUTDOWN_TIMEOUT="${SHUTDOWN_TIMEOUT:-30}"
 echo -e "${GREEN}=== Don't Starve Together Dedicated Server ===${NC}"
 echo ""
 
+# Check if cluster directory exists but is empty (freshly mounted volume)
+if [ -d "${CLUSTER_DIR}" ] && [ -z "$(ls -A ${CLUSTER_DIR} 2>/dev/null)" ]; then
+    echo -e "${YELLOW}Detected empty cluster directory (freshly mounted volume)${NC}"
+    echo -e "${YELLOW}This is normal for first run - configuration will be generated${NC}"
+fi
+
 # Function to gracefully shutdown servers
 shutdown() {
     echo -e "${YELLOW}Received shutdown signal. Stopping servers...${NC}"
@@ -86,22 +92,13 @@ fi
 
 echo -e "${GREEN}Step 1: Setting up cluster token...${NC}"
 
-# Ensure cluster directory exists and has proper permissions
-if [ ! -d "${CLUSTER_DIR}" ]; then
-    mkdir -p "${CLUSTER_DIR}"
-fi
-
-# Try to fix permissions if we can't write
-if [ ! -w "${CLUSTER_DIR}" ]; then
-    echo -e "${YELLOW}Warning: Cannot write to ${CLUSTER_DIR}. Trying to fix permissions...${NC}"
-    # This will only work if run as root, otherwise it will fail silently
-    chmod -R u+w "${CLUSTER_DIR}" 2>/dev/null || true
-fi
-
+# Write cluster token
 echo "$CLUSTER_TOKEN" > "${CLUSTER_DIR}/cluster_token.txt" || {
     echo -e "${RED}ERROR: Cannot write cluster token to ${CLUSTER_DIR}/cluster_token.txt${NC}"
-    echo -e "${YELLOW}Please ensure the mounted volume has write permissions for user ID $(id -u)${NC}"
-    echo -e "${YELLOW}Run on host: chmod -R 777 ./test/data${NC}"
+    echo -e "${YELLOW}This should not happen as permissions are fixed by entrypoint.${NC}"
+    echo -e "${YELLOW}Container user: $(whoami) (UID: $(id -u))${NC}"
+    echo -e "${YELLOW}Directory: ${CLUSTER_DIR}${NC}"
+    ls -la "${CLUSTER_DIR}" 2>/dev/null || echo "Directory doesn't exist"
     exit 1
 }
 

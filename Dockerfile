@@ -7,17 +7,16 @@ ENV DEBIAN_FRONTEND=noninteractive \
     STEAMCMD_DIR=/home/steam/steamcmd \
     DST_DIR=/home/steam/dst
 
-# Enable i386 architecture and install dependencies
-RUN dpkg --add-architecture i386 \
-    && apt-get update && apt-get install -y \
+# Install dependencies
+RUN apt-get update && apt-get install -y \
     lib32gcc-s1 \
     lib32stdc++6 \
-    libc6:i386 \
-    libstdc++6:i386 \
-    libcurl4-gnutls-dev:i386 \
-    libcurl3-gnutls:amd64 \
-    libgcc1:amd64 \
-    libstdc++6:amd64 \
+    libc6 \
+    libstdc++6 \
+    libcurl4-gnutls-dev \
+    libcurl3-gnutls \
+    libgcc1 \
+    libstdc++6 \
     wget \
     curl \
     ca-certificates \
@@ -26,25 +25,23 @@ RUN dpkg --add-architecture i386 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# Copy and set up entrypoint
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 # Create steam user and home directories
 RUN useradd -m -d $HOME -s /bin/bash $USER
 
-# Switch to steam user
+# Create necessary directories as steam user
+RUN mkdir -p $HOME/steamcmd $HOME/dst
+
+# Download and install SteamCMD as steam user
 USER $USER
 WORKDIR $HOME
 
-RUN mkdir -p $STEAMCMD_DIR $DST_DIR
-
-# Download and install SteamCMD
 RUN cd $STEAMCMD_DIR \
     && wget https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz \
-    && tar -xvzf steamcmd_linux.tar.gz && rm -f $STEAMCMD_DIR/steamcmd_linux.tar.gz
-
-# Note: SteamCMD will initialize on first run in the startup script
-
-# Create necessary directories for DST server
-RUN mkdir -p $HOME/.klei/DoNotStarveTogether/MyDediServer/Master \
-    && mkdir -p $HOME/.klei/DoNotStarveTogether/MyDediServer/Caves
+    && tar -xvzf steamcmd_linux.tar.gz && rm -f steamcmd_linux.tar.gz
 
 # Expose ports
 # Game ports (need port forwarding)
@@ -61,4 +58,4 @@ COPY --chown=steam:steam templates/ $HOME/templates/
 RUN chmod +x $HOME/start_server.sh $HOME/healthcheck.sh
 
 # Set the entrypoint
-ENTRYPOINT ["/home/steam/start_server.sh"]
+ENTRYPOINT ["/entrypoint.sh"]
